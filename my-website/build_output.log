@@ -1,0 +1,31 @@
+
+> my-website@0.0.0 build
+> docusaurus build
+
+[WARNING] The `siteConfig.onBrokenMarkdownLinks` config option is deprecated and will be removed in Docusaurus v4.
+Please migrate and move this option to `siteConfig.markdown.hooks.onBrokenMarkdownLinks` instead.
+[INFO] [en] Creating an optimized production build...
+[WARNING] The `siteConfig.onBrokenMarkdownLinks` config option is deprecated and will be removed in Docusaurus v4.
+Please migrate and move this option to `siteConfig.markdown.hooks.onBrokenMarkdownLinks` instead.
+[webpackbar] ℹ Compiling Client
+[webpackbar] ℹ Compiling Server
+[webpackbar] ✔ Server: Compiled successfully in 2.74m
+[webpackbar] ✔ Client: Compiled successfully in 4.45m
+
+[ERROR] Error: Unable to build website for locale en.
+    at tryToBuildLocale (/mnt/d/Hackathone Book/my-website/node_modules/@docusaurus/core/lib/commands/build/build.js:83:15)
+    at async /mnt/d/Hackathone Book/my-website/node_modules/@docusaurus/core/lib/commands/build/build.js:35:9
+    at async mapAsyncSequential (/mnt/d/Hackathone Book/my-website/node_modules/@docusaurus/utils/lib/jsUtils.js:21:24)
+    at async Command.build (/mnt/d/Hackathone Book/my-website/node_modules/@docusaurus/core/lib/commands/build/build.js:34:5)
+    at async Promise.all (index 0)
+    at async runCLI (/mnt/d/Hackathone Book/my-website/node_modules/@docusaurus/core/lib/commands/cli.js:56:5)
+    at async file:///mnt/d/Hackathone%20Book/my-website/node_modules/@docusaurus/core/bin/docusaurus.mjs:44:3 {
+  [cause]: [Error: ENOENT: no such file or directory, open '/mnt/d/Hackathone Book/my-website/build/__server/server.bundle.js'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/mnt/d/Hackathone Book/my-website/build/__server/server.bundle.js'
+  }
+}
+[INFO] Docusaurus version: 3.9.2
+Node version: v22.21.0
