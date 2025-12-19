@@ -5,7 +5,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
-import { BookOpen, Cpu, Cog, Eye, Brain, Zap, Code, Layers, Home } from 'lucide-react';
+import { BookOpen, Cpu, Cog, Eye, Brain, Zap, Code, Layers, Home as HomeIcon } from 'lucide-react';
 
 // Import the Chatbot component
 import Chatbot from '@site/src/components/Chatbot';
