@@ -5,6 +5,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
+import { BookOpen, Cpu, Cog, Eye, Brain, Zap, Code, Layers, Home } from 'lucide-react';
 
 // Import the Chatbot component
 import Chatbot from '@site/src/components/Chatbot';
@@ -31,23 +32,24 @@ function HomepageHeader() {
 
 function Module({ module, index }) {
   // Simple icon mapping based on module name
-  const getIcon = (title) => {
-    if (title.toLowerCase().includes('intro')) return '📚';
-    if (title.toLowerCase().includes('robot')) return '🤖';
-    if (title.toLowerCase().includes('digital') || title.toLowerCase().includes('twin')) return '💻';
-    if (title.toLowerCase().includes('ai') || title.toLowerCase().includes('brain')) return '🧠';
-    if (title.toLowerCase().includes('vision') || title.toLowerCase().includes('language') || title.toLowerCase().includes('action')) return '👁️';
-    if (title.toLowerCase().includes('nervous') || title.toLowerCase().includes('system')) return '🔌';
-    if (title.toLowerCase().includes('simulation')) return '🕹️';
-    if (title.toLowerCase().includes('module')) return '📦';
-    return '📖';
+  const getIcon = (title, index) => {
+    if (title.toLowerCase().includes('intro')) return <BookOpen size={24} />;
+    if (title.toLowerCase().includes('robot')) return <Cpu size={24} />;
+    if (title.toLowerCase().includes('digital') || title.toLowerCase().includes('twin')) return <Layers size={24} />;
+    if (title.toLowerCase().includes('ai') || title.toLowerCase().includes('brain')) return <Brain size={24} />;
+    if (title.toLowerCase().includes('vision') || title.toLowerCase().includes('language') || title.toLowerCase().includes('action')) return <Eye size={24} />;
+    if (title.toLowerCase().includes('nervous') || title.toLowerCase().includes('system')) return <Zap size={24} />;
+    if (title.toLowerCase().includes('simulation')) return <Cog size={24} />;
+    if (title.toLowerCase().includes('module')) return <Code size={24} />;
+    // Default to book icon
+    return <BookOpen size={24} />;
   };
 
   return (
     <div className="module-item">
       <div className="module-content">
         <div className="icon-circle">
-          {getIcon(module.title)}
+          {getIcon(module.title, index)}
         </div>
         <h3 className="module-title">{module.title}</h3>
         <p className="module-description">{module.description || 'Learn more about this topic'}</p>
@@ -100,19 +102,19 @@ function useAllDocsData() {
 
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
-  
+
   // Get all docs using our custom data fetching function
   const allDocs = useAllDocsData();
-  
+
   // Filter to get only the main module docs that are in the root of the docs directory
   const allModules = allDocs.filter(doc => {
     // Only include docs that are directly under docs/ (not in subdirectories)
     // Based on the sidebar structure, these are the main module introductions
     const pathParts = doc.permalink ? doc.permalink.split('/') : [];
-    return pathParts.length === 3 && 
-           pathParts[1] === 'docs' && 
-           (doc.id.includes('/intro') || 
-            doc.id === 'intro' || 
+    return pathParts.length === 3 &&
+           pathParts[1] === 'docs' &&
+           (doc.id.includes('/intro') ||
+            doc.id === 'intro' ||
             doc.id === 'physical-ai-humanoid-robotics' ||
             doc.id === 'module-1-robotic-nervous-system/intro' ||
             doc.id === 'module-2-digital-twin/intro' ||

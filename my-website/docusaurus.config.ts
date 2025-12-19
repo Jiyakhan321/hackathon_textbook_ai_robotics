@@ -8,9 +8,7 @@ module.exports = {
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
 
-  organizationName: 'Jiyakhan321',  // GitHub username
-  projectName: 'hackathon_textbook_ai_robotics',  // Repo name
-
+  // Even with a dark theme, we want to allow both color modes
   presets: [
     [
       'classic',
@@ -33,11 +31,17 @@ module.exports = {
   ],
 
   themeConfig: {
+    colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
+    },
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'Home',
-      logo: { 
-        alt: 'Home Icon', 
+      hideOnScroll: false,
+      logo: {
+        alt: 'Home Icon',
         src: 'img/home-icon.svg',
         width: 32,
         height: 32
