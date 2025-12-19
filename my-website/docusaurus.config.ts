@@ -1,6 +1,6 @@
 module.exports = {
-  title: 'My Book',
-  tagline: 'Hackathon Book',
+  title: 'Physical AI & Humanoid Robotics',
+  tagline: 'Comprehensive Guide to Embodied Intelligence',
   url: 'https://Jiyakhan321.github.io',  // Base domain, NOT the git URL
   baseUrl: '/hackathon_textbook_ai_robotics/',  // Repo name for GitHub Pages
 
@@ -35,10 +35,15 @@ module.exports = {
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'My Book',
-      logo: { alt: 'My Book Logo', src: 'img/logo.svg' },
+      title: 'Home',
+      logo: { 
+        alt: 'Home Icon', 
+        src: 'img/home-icon.svg',
+        width: 32,
+        height: 32
+      },
       items: [
-        { type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'left', label: 'Tutorial' },
+        { type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'left', label: 'Book' },
         { to: '/blog', label: 'Blog', position: 'left' },
         {
           href: 'https://github.com/Jiyakhan321/hackathon_textbook_ai_robotics',
@@ -52,7 +57,7 @@ module.exports = {
       links: [
         {
           title: 'Docs',
-          items: [{ label: 'Tutorial', to: '/docs/intro' }],
+          items: [{ label: 'Book', to: '/docs/intro' }],
         },
         {
           title: 'Community',

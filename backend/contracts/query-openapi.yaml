@@ -1,0 +1,207 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API for AI Textbook
+  description: API for querying the RAG chatbot with textbook content
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://staging-api.example.com
+    description: Staging server
+
+paths:
+  /query:
+    post:
+      summary: Query the chatbot using the full book content
+      description: Submit a question to be answered using the entire textbook corpus
+      operationId: queryFullBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Successful response with answer and sources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - apiKey: []
+
+  /query/selected-text:
+    post:
+      summary: Query the chatbot using only selected text
+      description: Submit a question to be answered using only the provided text passage
+      operationId: querySelectedText
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectedTextQueryRequest'
+      responses:
+        '200':
+          description: Successful response with answer and sources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Selected text insufficient to answer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TextInsufficientResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - apiKey: []
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          description: The question to be answered
+          example: "What is the main concept of attention mechanisms in transformers?"
+        context_mode:
+          type: string
+          enum: [full_book]
+          default: full_book
+          description: The context mode (fixed for this endpoint)
+
+    SelectedTextQueryRequest:
+      allOf:
+        - $ref: '#/components/schemas/QueryRequest'
+        - type: object
+          required:
+            - selected_text
+          properties:
+            selected_text:
+              type: string
+              description: The text passage to use as context for answering
+              example: "Attention mechanisms allow the model to focus on different parts of the input sequence when producing an output. This is accomplished through a weighted sum of the values, where the weights are computed by a compatibility function of the query with the corresponding key."
+            context_mode:
+              type: string
+              enum: [selected_text]
+              default: selected_text
+              description: The context mode (fixed for this endpoint)
+
+    QueryResponse:
+      type: object
+      required:
+        - answer
+        - sources
+        - confidence
+        - context_mode
+      properties:
+        answer:
+          type: string
+          description: The chatbot's answer to the question
+          example: "Attention mechanisms allow the model to focus on different parts of the input sequence when producing an output..."
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              chunk_id:
+                type: string
+                description: Unique identifier of the source chunk
+              chapter:
+                type: string
+                description: Chapter name of the source
+              section:
+                type: string
+                description: Section title of the source
+              page:
+                type: integer
+                description: Page number of the source
+          description: List of sources used to generate the answer
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Confidence score of the response
+        context_mode:
+          type: string
+          enum: [full_book, selected_text]
+          description: Context mode used to generate the response
+        timestamp:
+          type: string
+          format: date-time
+          description: When the response was generated
+
+    TextInsufficientResponse:
+      type: object
+      required:
+        - message
+        - context_mode
+      properties:
+        message:
+          type: string
+          description: Error message indicating insufficient information
+          example: "The selected text does not contain enough information to answer this question."
+        context_mode:
+          type: string
+          enum: [selected_text]
+          description: Context mode that was used
+        timestamp:
+          type: string
+          format: date-time
+          description: When the response was generated
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "QUERY_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The query could not be processed due to an internal error."
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
