@@ -1,65 +1,93 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import './Chatbot.css';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, text: 'Hello! I am your AI assistant. How can I help you with the Hackathon Book?', sender: 'bot' }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Function to get selected text from the page
+  const getSelectedText = () => {
+    const text = window.getSelection().toString().trim();
+    return text;
   };
 
+  // Function to handle text selection
   useEffect(() => {
-    scrollToBottom();
+    const handleSelection = () => {
+      const text = getSelectedText();
+      if (text) {
+        setSelectedText(text);
+      }
+    };
+
+    document.addEventListener('mouseup', handleSelection);
+    return () => {
+      document.removeEventListener('mouseup', handleSelection);
+    };
+  }, []);
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Toggle chat window
   const toggleChat = () => {
     setIsOpen(!isOpen);
+    if (!isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
   };
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
+  // Send message to backend
+  const sendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
-    // Add user message
     const userMessage = { id: Date.now(), text: inputValue, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
 
     try {
-      // Send to backend
-      const response = await fetch('http://localhost:8000/chat', {
+      // Determine which endpoint to use based on selected text
+      const endpoint = selectedText ? '/chat/selected' : '/chat';
+      const requestBody = selectedText
+        ? { query: inputValue, selected_text: selectedText }
+        : { query: inputValue };
+
+      // In a real implementation, replace with your Railway backend URL
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000'}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: inputValue }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error(`Server responded with status ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-
-      // Add bot response
       const botMessage = {
         id: Date.now() + 1,
-        text: data.reply || 'Sorry, I could not understand that.',
-        sender: 'bot'
+        text: data.response,
+        sender: 'bot',
+        sources: data.sources || [],
       };
+
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error sending message:', error);
       const errorMessage = {
         id: Date.now() + 1,
-        text: 'Sorry, there was an error processing your request. Please try again.',
-        sender: 'bot'
+        text: 'Sorry, I encountered an error. Please try again.',
+        sender: 'bot',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -67,73 +95,93 @@ const Chatbot = () => {
     }
   };
 
+  // Handle key press (Enter to send)
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      sendMessage();
     }
   };
 
+  // Clear selection when sending a message
+  const handleSendMessage = () => {
+    sendMessage();
+    setSelectedText(''); // Clear selected text after sending
+  };
+
   return (
-    <div className="chatbot-container">
-      {isOpen ? (
+    <div className="chatbot">
+      {/* Floating button to open chat */}
+      <button className={`chatbot-button ${isOpen ? 'open' : ''}`} onClick={toggleChat}>
+        {isOpen ? '✕' : '🤖 AI Assistant'}
+      </button>
+
+      {/* Chat window */}
+      {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
-            <div className="chatbot-header-content">
-              <Bot size={18} className="chatbot-header-icon" />
-              <h3>AI Assistant</h3>
-            </div>
-            <button className="chatbot-close" onClick={toggleChat}>
-              <X size={20} />
-            </button>
-          </div>
-          <div className="chatbot-messages">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`message ${message.sender}-message`}
-              >
-                <div className="message-content">
-                  <div className="message-icon">
-                    {message.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
-                  </div>
-                  <span>{message.text}</span>
-                </div>
+            <h3>Book Assistant</h3>
+            {selectedText && (
+              <div className="selected-text-indicator">
+                Using selected text: "{selectedText.substring(0, 50)}..."
               </div>
-            ))}
+            )}
+          </div>
+          
+          <div className="chatbot-messages">
+            {messages.length === 0 ? (
+              <div className="welcome-message">
+                <p>Hello! I'm your AI assistant for the Physical AI & Humanoid Robotics book.</p>
+                <p>You can:</p>
+                <ul>
+                  <li>Ask general questions about the book content</li>
+                  <li>Select text on the page and ask specific questions about it</li>
+                </ul>
+              </div>
+            ) : (
+              messages.map((message) => (
+                <div key={message.id} className={`message ${message.sender}`}>
+                  <div className="message-content">
+                    <p>{message.text}</p>
+                    {message.sender === 'bot' && message.sources && message.sources.length > 0 && (
+                      <div className="sources">
+                        <small>Sources: {message.sources.map(s => s.title).join(', ')}</small>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
             {isLoading && (
-              <div className="message bot-message">
-                <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+              <div className="message bot">
+                <div className="message-content">
+                  <p>Thinking...</p>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
-          <div className="chatbot-input-area">
+          
+          <div className="chatbot-input">
             <textarea
+              ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className="chatbot-input"
-              rows="1"
+              placeholder={selectedText 
+                ? "Ask about the selected text..." 
+                : "Ask a question about the book..."}
+              rows="2"
             />
-            <button
-              onClick={handleSend}
-              disabled={isLoading || !inputValue.trim()}
-              className="chatbot-send-button"
+            <button 
+              onClick={handleSendMessage} 
+              disabled={!inputValue.trim() || isLoading}
+              className="send-button"
             >
-              <Send size={18} />
+              Send
             </button>
           </div>
         </div>
-      ) : (
-        <button className="chatbot-toggle" onClick={toggleChat}>
-          <MessageCircle size={24} />
-        </button>
       )}
     </div>
   );

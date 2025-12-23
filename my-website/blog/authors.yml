@@ -10,6 +10,15 @@ yangshun:
     github: yangshun
     newsletter: https://www.greatfrontend.com
 
+jiya:
+  name: Jiya Khan
+  title: Student Researcher in Physical AI & Humanoid Robotics
+  url: https://github.com/jiyakhan321
+  image_url: https://github.com/jiyakhan321.png
+  socials:
+    github: jiyakhan321
+    linkedin: jiyakhan321
+
 slorber:
   name: Sébastien Lorber
   title: Docusaurus maintainer

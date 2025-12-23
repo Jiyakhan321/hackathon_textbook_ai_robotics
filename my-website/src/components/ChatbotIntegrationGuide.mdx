@@ -1,0 +1,28 @@
+// Example of how to add the chatbot to a specific page
+// In any MDX file, you can add:
+//
+// import Chatbot from '@site/src/components/Chatbot';
+//
+// # My Page
+//
+// Some content here...
+//
+// <Chatbot />
+//
+// More content...
+
+// If you want to add it site-wide, you can create a custom layout
+// by creating src/theme/Layout/index.js with:
+
+import React from 'react';
+import OriginalLayout from '@theme-original/Layout';
+import Chatbot from '@site/src/components/Chatbot';
+
+export default function Layout(props) {
+  return (
+    <>
+      <OriginalLayout {...props}>{props.children}</OriginalLayout>
+      <Chatbot />
+    </>
+  );
+}
