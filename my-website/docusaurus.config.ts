@@ -1,8 +1,8 @@
 module.exports = {
   title: 'Physical AI & Humanoid Robotics',
   tagline: 'Comprehensive Guide to Embodied Intelligence',
-  url: 'https://Jiyakhan321.github.io',  // Base domain, NOT the git URL
-  baseUrl: '/hackathon_textbook_ai_robotics/',  // Repo name for GitHub Pages
+  url: 'https://hackathon-textbook-ai-robotics.vercel.app',  // Vercel domain
+  baseUrl: '/',  // Root path for Vercel deployment
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
