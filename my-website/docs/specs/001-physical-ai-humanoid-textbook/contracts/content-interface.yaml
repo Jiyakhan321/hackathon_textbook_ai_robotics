@@ -1,0 +1,285 @@
+# API Contract: Physical AI and Humanoid Robotics Textbook Content Interface
+
+## Overview
+This contract defines the interfaces for the Physical AI and Humanoid Robotics textbook content system. Since this is a documentation project, the "API" consists of content interfaces and component contracts that define how users interact with the educational content.
+
+## Content Management Interface
+
+### Module Interface
+**Purpose**: Defines how learning modules are structured and accessed
+
+**Input Parameters**:
+- `moduleId`: Unique identifier for the learning module
+- `userLevel`: Current user's proficiency level (beginner, intermediate, advanced, expert)
+
+**Output Structure**:
+```json
+{
+  "id": "string",
+  "title": "string",
+  "level": "enum(beginner|intermediate|advanced|expert)",
+  "prerequisites": ["string"],
+  "learningObjectives": ["string"],
+  "contentSections": [
+    {
+      "id": "string",
+      "title": "string",
+      "order": "integer",
+      "duration": "integer (minutes)",
+      "contentType": "enum(theory|practical|example|case-study)"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "string",
+      "title": "string",
+      "difficulty": "enum(easy|medium|hard)",
+      "type": "enum(simulation|coding|analysis|project)",
+      "duration": "integer (hours)"
+    }
+  ],
+  "assessments": [
+    {
+      "id": "string",
+      "title": "string",
+      "type": "enum(quiz|project|practical|peer-review)",
+      "passingScore": "integer (0-100)"
+    }
+  ],
+  "duration": "integer (hours)",
+  "tags": ["string"]
+}
+```
+
+**Error Responses**:
+- `404 NOT_FOUND`: Module with given ID does not exist
+- `400 INVALID_INPUT`: Invalid moduleId format
+
+### Content Section Interface
+**Purpose**: Defines how individual content sections are accessed and displayed
+
+**Input Parameters**:
+- `sectionId`: Unique identifier for the content section
+- `moduleId`: Reference to parent module (for context)
+
+**Output Structure**:
+```json
+{
+  "id": "string",
+  "moduleId": "string",
+  "title": "string",
+  "content": "markdown content",
+  "contentType": "enum(theory|practical|example|case-study)",
+  "order": "integer",
+  "duration": "integer (minutes)",
+  "requiresCode": "boolean",
+  "relatedSections": ["string"],
+  "interactiveComponents": [
+    {
+      "type": "enum(code-playground|simulation-viewer|quiz-component)",
+      "config": "object"
+    }
+  ]
+}
+```
+
+**Error Responses**:
+- `404 NOT_FOUND`: Section with given ID does not exist
+- `400 INVALID_INPUT`: Invalid sectionId format
+
+### Exercise Interface
+**Purpose**: Defines how exercises are accessed and submitted
+
+**Input Parameters**:
+- `exerciseId`: Unique identifier for the exercise
+- `moduleId`: Reference to parent module
+- `userAction`: Action to perform (view, submit, reset)
+
+**Output Structure**:
+```json
+{
+  "id": "string",
+  "moduleId": "string",
+  "title": "string",
+  "description": "string",
+  "difficulty": "enum(easy|medium|hard)",
+  "type": "enum(simulation|coding|analysis|project)",
+  "instructions": "string",
+  "expectedOutcome": "string",
+  "resources": ["string"],
+  "solutionAvailable": "boolean",
+  "duration": "integer (hours)",
+  "interactiveEnvironment": {
+    "type": "enum(simulation-environment|code-editor|project-template)",
+    "config": "object"
+  }
+}
+```
+
+**Error Responses**:
+- `404 NOT_FOUND`: Exercise with given ID does not exist
+- `400 INVALID_INPUT`: Invalid exerciseId format
+- `409 CONFLICT`: Exercise already submitted
+
+### Assessment Interface
+**Purpose**: Defines how assessments are accessed, submitted, and evaluated
+
+**Input Parameters**:
+- `assessmentId`: Unique identifier for the assessment
+- `moduleId`: Reference to parent module
+- `userAction`: Action to perform (start, submit, review)
+- `answers`: User responses (for submit action)
+
+**Output Structure**:
+```json
+{
+  "id": "string",
+  "moduleId": "string",
+  "title": "string",
+  "type": "enum(quiz|project|practical|peer-review)",
+  "questions": [
+    {
+      "id": "string",
+      "type": "enum(multiple-choice|short-answer|code|project)",
+      "questionText": "string",
+      "options": ["string"] (for multiple-choice),
+      "correctAnswer": "string" (masked for active assessment)
+    }
+  ],
+  "passingScore": "integer (0-100)",
+  "timeLimit": "integer (minutes)",
+  "attemptsAllowed": "integer",
+  "currentAttempt": "integer",
+  "status": "enum(not-started|in-progress|completed|graded)",
+  "score": "integer (0-100)",
+  "feedback": "string"
+}
+```
+
+**Error Responses**:
+- `404 NOT_FOUND`: Assessment with given ID does not exist
+- `400 INVALID_INPUT`: Invalid assessmentId format or answers format
+- `409 CONFLICT`: Assessment already completed or time limit exceeded
+
+## Search and Navigation Interface
+
+### Search Interface
+**Purpose**: Enables users to search across all textbook content
+
+**Input Parameters**:
+- `query`: Search query string
+- `filters`: Optional filters (level, tags, content type)
+- `limit`: Maximum number of results to return
+- `offset`: Offset for pagination
+
+**Output Structure**:
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "title": "string",
+      "type": "enum(module|section|exercise|assessment)",
+      "moduleId": "string",
+      "relevance": "float (0-1)",
+      "preview": "string (summary)"
+    }
+  ],
+  "totalResults": "integer",
+  "hasMore": "boolean"
+}
+```
+
+**Error Responses**:
+- `400 INVALID_INPUT`: Query parameter missing or too short
+
+### Navigation Interface
+**Purpose**: Provides structured navigation through the textbook
+
+**Input Parameters**:
+- `currentId`: Current content ID (module, section, etc.)
+- `direction`: Navigation direction (next, previous, parent, children)
+
+**Output Structure**:
+```json
+{
+  "current": {
+    "id": "string",
+    "title": "string",
+    "type": "enum(module|section|exercise|assessment)"
+  },
+  "next": {
+    "id": "string",
+    "title": "string",
+    "type": "enum(module|section|exercise|assessment)"
+  },
+  "previous": {
+    "id": "string",
+    "title": "string",
+    "type": "enum(module|section|exercise|assessment)"
+  },
+  "children": [
+    {
+      "id": "string",
+      "title": "string",
+      "type": "enum(section|exercise|assessment)",
+      "completed": "boolean"
+    }
+  ]
+}
+```
+
+## Progress Tracking Interface
+
+### Progress Interface
+**Purpose**: Tracks and reports user progress through the textbook
+
+**Input Parameters**:
+- `userId`: Unique identifier for the user
+- `action`: Action to perform (get, update, reset)
+- `progressData`: Progress data to update (for update action)
+
+**Output Structure**:
+```json
+{
+  "userId": "string",
+  "modulesCompleted": [
+    {
+      "moduleId": "string",
+      "completionPercentage": "integer (0-100)",
+      "timeSpent": "integer (minutes)",
+      "lastAccessed": "timestamp",
+      "assessmentsPassed": "integer",
+      "exercisesCompleted": "integer"
+    }
+  ],
+  "currentModule": "string (moduleId)",
+  "overallProgress": "integer (0-100)",
+  "estimatedCompletionTime": "integer (hours)"
+}
+```
+
+**Error Responses**:
+- `400 INVALID_INPUT`: Invalid userId format
+- `404 NOT_FOUND`: User with given ID does not exist
+
+## Versioning Strategy
+- Content interfaces use semantic versioning (v1, v2, etc.)
+- Backward compatibility maintained for 12 months after deprecation
+- New versions introduced for breaking changes only
+
+## Idempotency
+- GET operations are idempotent
+- Progress update operations are idempotent when same data is sent multiple times
+
+## Timeouts and Retries
+- Standard HTTP timeout: 30 seconds
+- Client should retry failed requests with exponential backoff (2s, 4s, 8s)
+
+## Error Taxonomy
+- `400`: Client error (invalid input, malformed request)
+- `401`: Unauthorized access
+- `404`: Resource not found
+- `409`: Conflict (e.g., attempting to submit completed assessment)
+- `500`: Server error
+- `503`: Service temporarily unavailable
