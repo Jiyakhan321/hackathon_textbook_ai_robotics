@@ -1,3 +1,18 @@
+---
+title: Hackathon Chatbot Backend
+emoji: 🤖
+colorFrom: purple
+colorTo: red
+sdk: docker
+secrets:
+  - OPENROUTER_API_KEY
+  - OPENAI_API_KEY
+  - QDRANT_API_KEY
+  - QDRANT_URL
+  - DATABASE_URL
+persistence: true
+---
+
 # RAG Chatbot Backend
 
 This is the backend service for the RAG (Retrieval-Augmented Generation) chatbot that answers questions about your book content.
@@ -12,8 +27,8 @@ This is the backend service for the RAG (Retrieval-Augmented Generation) chatbot
 
 - FastAPI - Web framework
 - Qdrant Cloud - Vector database for embeddings
-- Neon Serverless Postgres - Metadata and session storage
-- OpenAI/Cohere - LLM for responses
+- OpenRouter/OpenAI - LLM for responses
+- Sentence Transformers - Qwen-like embeddings
 
 ## Setup
 
@@ -41,18 +56,12 @@ uvicorn main:app --reload
 
 The server will start on `http://localhost:8000`
 
-## Deployment to Railway
+## Deployment to HuggingFace Spaces
 
-1. Connect your GitHub repository to Railway
-2. Set the following build configuration:
-   - Root Directory: `chatbot-backend`
-3. Add environment variables in Railway dashboard:
-   - DATABASE_URL
-   - QDRANT_URL
-   - QDRANT_API_KEY
-   - OPENAI_API_KEY
-   - COHERE_API_KEY
-4. Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+This backend is designed to run on HuggingFace Spaces with the following configuration:
+- Port: 7860 (configured in main.py)
+- Dockerfile included for containerization
+- Environment variables set as HuggingFace Secrets
 
 ## API Endpoints
 
@@ -64,7 +73,8 @@ Accepts a JSON body:
 ```json
 {
   "query": "Your question here",
-  "context": "Optional additional context"
+  "context": null,
+  "selected_text": null
 }
 ```
 

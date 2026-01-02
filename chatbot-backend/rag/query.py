@@ -1,27 +1,30 @@
 import asyncio
-from typing import Optional, List, Dict, Any
-from langchain_openai import ChatOpenAI
+from typing import Optional, List
+from langchain_openrouter import ChatOpenRouter
 from langchain_core.messages import HumanMessage, SystemMessage
 from qdrant_client import QdrantClient
-from qdrant_client.http import models
 import logging
-from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 
 from models.schemas import QueryResponse
 from db.qdrant import get_qdrant_client
+from rag.embeddings import embed_text
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI model (lazy initialization to avoid import errors)
+# Initialize OpenRouter model (lazy initialization to avoid import errors)
 def get_llm():
-    return ChatOpenAI(
-        model="gpt-3.5-turbo",
+    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("Either OPENROUTER_API_KEY or OPENAI_API_KEY must be set in environment variables")
+
+    return ChatOpenRouter(
+        model="openai/gpt-4o",  # Using GPT-4o as a high-quality model available on OpenRouter
         temperature=0.1,
-        openai_api_key=os.getenv("OPENAI_API_KEY")
+        openrouter_api_key=api_key
     )
 
 async def query_rag(query: str, context: Optional[str] = None) -> QueryResponse:
@@ -31,15 +34,10 @@ async def query_rag(query: str, context: Optional[str] = None) -> QueryResponse:
     try:
         # Initialize Qdrant client
         qdrant_client = get_qdrant_client()
-        
-        # Create embedding for the query
-        from langchain_openai import OpenAIEmbeddings
-        embedding_model = OpenAIEmbeddings(
-            model="text-embedding-ada-002",
-            openai_api_key=os.getenv("OPENAI_API_KEY")
-        )
-        query_embedding = embedding_model.embed_query(query)
-        
+
+        # Create embedding for the query using our custom embedding function
+        query_embedding = embed_text(query)
+
         # Search in Qdrant for relevant chunks
         search_result = qdrant_client.search(
             collection_name="book_chunks",
@@ -47,7 +45,7 @@ async def query_rag(query: str, context: Optional[str] = None) -> QueryResponse:
             limit=5,  # Retrieve top 5 most relevant chunks
             with_payload=True
         )
-        
+
         # Extract relevant content
         relevant_chunks = []
         sources = []
@@ -59,7 +57,7 @@ async def query_rag(query: str, context: Optional[str] = None) -> QueryResponse:
             }
             relevant_chunks.append(chunk_content)
             sources.append(source_info)
-        
+
         if not relevant_chunks:
             response = QueryResponse(
                 response="I couldn't find any information about this in the book. Please check if your question is related to the book content.",
@@ -67,12 +65,12 @@ async def query_rag(query: str, context: Optional[str] = None) -> QueryResponse:
                 query=query
             )
             return response
-        
+
         # Combine context and relevant chunks
         context_str = "\n\n".join(relevant_chunks)
         if context:
             context_str = f"{context}\n\n{context_str}"
-        
+
         # Create the prompt for the LLM
         system_message = SystemMessage(
             content="You are an AI assistant that answers questions based on provided book content. "
@@ -80,24 +78,24 @@ async def query_rag(query: str, context: Optional[str] = None) -> QueryResponse:
                     "If the answer is not in the context, clearly state that the information is not in the book. "
                     "Be concise and accurate in your responses."
         )
-        
+
         human_message = HumanMessage(
             content=f"Context: {context_str}\n\nQuestion: {query}\n\nAnswer:"
         )
-        
+
         # Get response from LLM
         llm = get_llm()
         result = llm.invoke([system_message, human_message])
         answer = result.content
-        
+
         response = QueryResponse(
             response=answer,
             sources=sources,
             query=query
         )
-        
+
         return response
-        
+
     except Exception as e:
         logger.error(f"Error during RAG query: {str(e)}")
         raise e
@@ -114,7 +112,7 @@ async def query_selected_text(query: str, selected_text: str) -> QueryResponse:
                 query=query
             )
             return response
-        
+
         # Create the prompt for the LLM using only the selected text
         system_message = SystemMessage(
             content="You are an AI assistant that answers questions based only on the provided selected text. "
@@ -122,24 +120,24 @@ async def query_selected_text(query: str, selected_text: str) -> QueryResponse:
                     "If the answer is not in the selected text, clearly state that the information is not in the selected text. "
                     "Be concise and accurate in your responses."
         )
-        
+
         human_message = HumanMessage(
             content=f"Selected text: {selected_text}\n\nQuestion: {query}\n\nAnswer:"
         )
-        
+
         # Get response from LLM
         llm = get_llm()
         result = llm.invoke([system_message, human_message])
         answer = result.content
-        
+
         response = QueryResponse(
             response=answer,
             sources=[{"title": "Selected Text", "source": "User Selection"}],
             query=query
         )
-        
+
         return response
-        
+
     except Exception as e:
         logger.error(f"Error during selected text query: {str(e)}")
         raise e
