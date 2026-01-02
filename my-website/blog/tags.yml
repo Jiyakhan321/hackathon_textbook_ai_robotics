@@ -17,3 +17,18 @@ hola:
   label: Hola
   permalink: /hola
   description: Hola tag description
+
+ai:
+  label: AI
+  permalink: /ai
+  description: Articles about Artificial Intelligence
+
+robotics:
+  label: Robotics
+  permalink: /robotics
+  description: Articles about Robotics
+
+learning:
+  label: Learning
+  permalink: /learning
+  description: Learning resources and guides

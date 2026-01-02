@@ -23,54 +23,35 @@ const Chatbot = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!inputValue.trim()) return;
 
     // Add user message
     const userMessage = { id: Date.now(), text: inputValue, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
+
+    // Simulate bot response with helpful messages about the book
     setIsLoading(true);
 
-    try {
-      // Send to HuggingFace backend
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://jiyaMughal-hackathon-chatbot-backend.hf.space';
-      const response = await fetch(`${BACKEND_URL}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: inputValue,  // Changed from 'message' to 'query' to match backend
-          context: null,
-          selected_text: null
-        }),
-      });
+    setTimeout(() => {
+      const botResponses = [
+        "I'm a frontend-only chatbot. For questions about the Physical AI & Humanoid Robotics book, please check the documentation sections.",
+        "This is a frontend-only version of the chatbot. The full AI functionality requires backend services.",
+        "To learn about Physical AI & Humanoid Robotics, explore the book sections in the navigation menu.",
+        "This chatbot component is now running frontend-only. For full AI features, backend services would be needed.",
+        "Check out the book chapters for comprehensive information on Humanoid Robotics and AI."
+      ];
 
-      if (!response.ok) {
-        throw new Error(`Server responded with status ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Add bot response - Changed from 'reply' to 'response' to match backend
+      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
       const botMessage = {
         id: Date.now() + 1,
-        text: data.response || 'Sorry, I could not understand that.',
+        text: randomResponse,
         sender: 'bot'
       };
       setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage = {
-        id: Date.now() + 1,
-        text: 'Sorry, there was an error processing your request. Please try again.',
-        sender: 'bot'
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   const handleKeyPress = (e) => {

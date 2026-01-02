@@ -8,7 +8,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://hackathon-textbook-ai-robotics.vercel.app',
+  url: 'https://hackathon-book-ai-robotics.vercel.app',
   // Set the /<baseUrl>/ pathname under which your site is served
   baseUrl: '/',
 

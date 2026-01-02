@@ -1,0 +1,23 @@
+{
+  "github": {
+    "enabled": true,
+    "autoJobCancelation": true
+  },
+  "builds": [
+    {
+      "src": "my-website/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

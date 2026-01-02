@@ -1,4 +1,11 @@
 {
+  "name": "hackathon-textbook-ai-robotics",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd my-website && npm run build",
+    "dev": "cd my-website && npm run start",
+    "prebuild": "cd my-website && npm install"
+  },
   "dependencies": {
     "lucide-react": "^0.562.0"
   }
