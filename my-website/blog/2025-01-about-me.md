@@ -9,6 +9,8 @@ import TOCInline from '@theme/TOCInline';
 
 <TOCInline toc={toc} />
 
+<!-- truncate -->
+
 ## Introduction
 
 Welcome to my journey into the fascinating world of Physical AI and Humanoid Robotics! My name is Jiya, and I'm passionate about exploring the intersection of artificial intelligence and physical systems that can interact with our world in meaningful ways.
