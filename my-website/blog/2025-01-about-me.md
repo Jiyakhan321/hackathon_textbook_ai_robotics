@@ -1,7 +1,7 @@
 ---
 slug: about-me
 title: My Journey into Physical AI & Humanoid Robotics
-author: jiya
+authors: [jiya]
 tags: [ai, robotics, learning]
 ---
 
