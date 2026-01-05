@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # Application settings
     app_name: str = "RAG Chatbot for Published AI Book"
     debug: bool = False
-    allowed_origins: str = "*"  # Should be configured properly in production
+    allowed_origins: str = "*"  # Will be overridden by ALLOWED_ORIGINS env var
 
     class Config:
         env_file = ".env"
